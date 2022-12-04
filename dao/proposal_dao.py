@@ -1,11 +1,23 @@
-from typing import Dict
+from typing import Dict, List
 from .base_dao import BaseDao
 from firebase_admin import firestore
-from utils.func_utils import retries
+from hclass_common.utils.func_utils import retries
 import time
 
 
 class ProposalDao(BaseDao):
+
+    def fetch_proposals(
+        self,
+        uid: str,
+    ) -> List[Dict]:
+        data_list = self.client.collection("proposals").where("uid", '==', uid).get()
+        new_data_list = []
+        for x in data_list:
+            datadict = x.to_dict()
+            datadict['dataid'] = x.id
+            new_data_list.append(datadict)
+        return new_data_list
 
     @retries(4, 4)
     def fetch_recent_proposal(

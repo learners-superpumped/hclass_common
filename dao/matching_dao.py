@@ -2,8 +2,8 @@ from typing import Dict, Tuple
 from .base_dao import BaseDao
 from firebase_admin import firestore
 from datetime import datetime as dt
-from utils.timeutils import set_hour_24, fetch_appointments_list
-from utils.func_utils import retries
+from hclass_common.utils.timeutils import set_hour_24, fetch_appointments_list
+from hclass_common.utils.func_utils import retries
 
 
 class MatchingDao(BaseDao):

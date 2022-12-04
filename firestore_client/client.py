@@ -1,6 +1,7 @@
 from google.cloud.firestore import Client
 from .firestore_client import FirestoreClient
 from firebase_admin import credentials
+from contextlib import contextmanager
 
 
 test_client: Client = FirestoreClient(
@@ -23,6 +24,17 @@ def get_firebase_client() -> FirestoreClient:
     finally:
         client.close()
 
+
+@contextmanager
+def get_firebase_client_context():
+    try:
+        cred = credentials.Certificate('hclass.json')
+        client =  FirestoreClient(
+            project='h-class',
+        )
+        yield client
+    finally:
+        client.close()
 
 def get_firebase_test_client() -> FirestoreClient:
     try:
