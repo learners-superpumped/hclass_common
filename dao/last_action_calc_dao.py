@@ -16,9 +16,8 @@ class LastCalculationDao(BaseDao):
             return new_data_list[0]
         return None
 
-
     def insert_last_action(self, datadict: Dict) -> Optional[Dict]:
         self.client.collection('last_action_log').add(datadict)
         
-    def update_last_action(self, dataid: str,datadict: Dict) -> Optional[Dict]:
+    def update_last_action(self, dataid: str, datadict: Dict) -> Optional[Dict]:
         self.client.collection('last_action_log').document(dataid).update(datadict)

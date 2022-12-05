@@ -1,7 +1,6 @@
 from typing import Dict, Tuple
 from .base_dao import BaseDao
 from firebase_admin import firestore
-from datetime import datetime as dt
 from hclass_common.utils.timeutils import set_hour_24, fetch_appointments_list
 from hclass_common.utils.func_utils import retries
 
@@ -118,10 +117,9 @@ class MatchingDao(BaseDao):
         woman_matching_id: str,
         preferred_region: str = '한남동',
         preferred_place_type: str = '레스토랑',
-        manner_comment: str="반갑습닏. 저는 커피도 식사도 좋아요 :-)",
+        manner_comment: str = "반갑습닏. 저는 커피도 식사도 좋아요 :-)",
     ) -> Dict:
         timelist = fetch_appointments_list()
-        confirm_time_limit = set_hour_24()
         self.client.collection('matchings').document(woman_matching_id).update(
             {
                 "women_status_ready_at": firestore.SERVER_TIMESTAMP,
@@ -140,7 +138,6 @@ class MatchingDao(BaseDao):
         man_matching_id: str,
         selected_place: str = DEFAULT_SELECTED_PLACE,
     ) -> Dict:
-        timelist = fetch_appointments_list()
         selected_place = {
             'roadAddress': '서울특별시 영등포구 국제금융로8길 31 K-Tower 1층 105호, 106호',
             'link': 'http://www.coffeebeankorea.com/',
@@ -160,8 +157,6 @@ class MatchingDao(BaseDao):
         self,
         woman_matching_id: str,
     ) -> Dict:
-        timelist = fetch_appointments_list()
-        confirm_time_limit = set_hour_24()
         self.client.collection('matchings').document(woman_matching_id).update(
             {
                 "women_status_ready_at": set_hour_24(-1),

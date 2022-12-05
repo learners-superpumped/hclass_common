@@ -4,4 +4,4 @@ from hclass_common.firestore_client.firestore_client import FirestoreClient
 class BaseDao(object):
 
     def __init__(self, client: FirestoreClient):
-        self.client: Client = client
+        self.client: FirestoreClient = client

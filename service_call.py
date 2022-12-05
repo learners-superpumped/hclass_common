@@ -5,8 +5,8 @@ from typing import Dict
 MESSAGE_SERVER_TOKEN = os.environ.get("MESSAGE_SERVER_TOKEN")
 MESSAGE_SERVER_ENDPOINT = 'https://log.superdots.xyz'
 MESSAGE_SERVER_HEADERS = {
-  'Content-Type': 'application/json',
-  'Authorization': f"Bearer {MESSAGE_SERVER_TOKEN}",
+    'Content-Type': 'application/json',
+    'Authorization': f"Bearer {MESSAGE_SERVER_TOKEN}",
 }
 
 

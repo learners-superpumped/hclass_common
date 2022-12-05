@@ -1,7 +1,5 @@
 from typing import Dict, List
 from .base_dao import BaseDao
-from firebase_admin import auth
-import pandas as pd
 
 
 class UserDao(BaseDao):
@@ -10,7 +8,6 @@ class UserDao(BaseDao):
         result = self.client.collection("users").where('uid', '==', uid).get()
         result = result[0]
         return result.to_dict()
-
 
     def fetch_active_woman_list(self) -> List[Dict]:
         user_col_ref = self.client.collection("users")
@@ -27,3 +24,4 @@ class UserDao(BaseDao):
         for data in result:
             user_list.append(data.to_dict())
         return user_list
+

@@ -2,7 +2,6 @@ from typing import Dict, List
 from .base_dao import BaseDao
 from firebase_admin import firestore
 from hclass_common.utils.func_utils import retries
-import time
 
 
 class ProposalDao(BaseDao):
@@ -18,6 +17,27 @@ class ProposalDao(BaseDao):
             datadict['dataid'] = x.id
             new_data_list.append(datadict)
         return new_data_list
+
+    def fetch_remained_proposals(
+        self,
+    ) -> List[Dict]:
+        data_list = self.client.collection("proposals").where('is_matched', '==', False).where("is_passed", '==', False).get()
+        new_data_list = []
+        for x in data_list:
+            datadict = x.to_dict()
+            datadict['dataid'] = x.id
+            new_data_list.append(datadict)
+        return new_data_list
+
+    def deactivate_proposals(
+        self,
+        proposal_id
+    ) -> List[Dict]:
+        current_timestamp = firestore.SERVER_TIMESTAMP
+        self.client.collection("proposals").document(proposal_id).update({
+            'is_deactivated': True,
+            'deactivated_at': current_timestamp
+        })
 
     @retries(4, 4)
     def fetch_recent_proposal(

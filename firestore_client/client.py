@@ -16,8 +16,7 @@ production_client: Client = FirestoreClient(
 
 def get_firebase_client() -> FirestoreClient:
     try:
-        cred = credentials.Certificate('hclass.json')
-        client =  FirestoreClient(
+        client = FirestoreClient(
             project='h-class',
         )
         yield client
@@ -28,17 +27,29 @@ def get_firebase_client() -> FirestoreClient:
 @contextmanager
 def get_firebase_client_context():
     try:
-        cred = credentials.Certificate('hclass.json')
-        client =  FirestoreClient(
+        client = FirestoreClient(
             project='h-class',
         )
         yield client
     finally:
         client.close()
 
+
+@contextmanager
+def get_firebase_test_client_context():
+    try:
+        client = FirestoreClient(
+            project='h-class',
+            emulator_host='host.docker.internal:8080'
+        )
+        yield client
+    finally:
+        client.close()
+
+
 def get_firebase_test_client() -> FirestoreClient:
     try:
-        client =  FirestoreClient(
+        client = FirestoreClient(
             project='h-class',
             emulator_host='host.docker.internal:8080'
         )
