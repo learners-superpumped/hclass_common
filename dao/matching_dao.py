@@ -5,7 +5,13 @@ from datetime import datetime as dt
 from hclass_common.utils.timeutils import set_hour_24, fetch_appointments_list
 from hclass_common.utils.func_utils import retries
 
-
+DEFAULT_SELECTED_PLACE = {
+    'roadAddress': '서울특별시 영등포구 국제금융로8길 31 K-Tower 1층 105호, 106호',
+    'link': 'http://www.coffeebeankorea.com/',
+    'description': '',
+    'telephone': '',
+    'title': '<b>커피</b>빈 여의도<b>SK</b><b>증권</b>빌딩점'
+}
 class MatchingDao(BaseDao):
 
     def delete_related_matchings(
@@ -129,3 +135,37 @@ class MatchingDao(BaseDao):
             }
         )
         
+    def confirm_male_selected_place(
+        self,
+        man_matching_id: str,
+        selected_place: str = DEFAULT_SELECTED_PLACE,
+    ) -> Dict:
+        timelist = fetch_appointments_list()
+        selected_place = {
+            'roadAddress': '서울특별시 영등포구 국제금융로8길 31 K-Tower 1층 105호, 106호',
+            'link': 'http://www.coffeebeankorea.com/',
+            'description': '',
+            'telephone': '',
+            'title': '<b>커피</b>빈 여의도<b>SK</b><b>증권</b>빌딩점'
+        }
+        self.client.collection('matchings').document(man_matching_id).update(
+            {
+                "male_confirmed_at": firestore.SERVER_TIMESTAMP,
+                "selected_place": selected_place,
+                "selected_appointment": set_hour_24(1)
+            }
+        )
+    
+    def back_status_ready_data(
+        self,
+        woman_matching_id: str,
+    ) -> Dict:
+        timelist = fetch_appointments_list()
+        confirm_time_limit = set_hour_24()
+        self.client.collection('matchings').document(woman_matching_id).update(
+            {
+                "women_status_ready_at": set_hour_24(-1),
+                "confirm_time_limit": set_hour_24(-1),
+            }
+        )
+    
