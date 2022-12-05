@@ -3,7 +3,7 @@ from google.api_core.datetime_helpers import DatetimeWithNanoseconds
 
 
 def fetch_inactive_proposal_list(proposal_list: List[Dict]) -> List[Dict]:
-    new_proposal_list = [x for x in proposal_list if x.get('is_passed') is False and x.get("is_matched") is False]
+    new_proposal_list = [x for x in proposal_list if x.get('is_passed') is False and x.get("is_matched") is False and x.get("is_deactivated") is not True]
     return new_proposal_list
 
 def fetch_oldest_proposal(proposal_list: List[Dict]) -> Dict:
