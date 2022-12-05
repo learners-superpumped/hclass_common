@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 from .base_dao import BaseDao
 from firebase_admin import firestore
 from hclass_common.utils.timeutils import set_hour_24, fetch_appointments_list
@@ -164,3 +164,13 @@ class MatchingDao(BaseDao):
             }
         )
     
+    def fetch_matching_complete_list(
+        self,
+    ) -> List[Dict]:
+        data_list = self.client.collection("matchings").where("status", '==', "complete").get()
+        new_data_list = []
+        for x in data_list:
+            datadict = x.to_dict()
+            datadict['dataid'] = x.id
+            new_data_list.append(datadict)
+        return new_data_list
