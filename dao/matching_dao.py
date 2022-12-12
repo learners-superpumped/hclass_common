@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional
 from .base_dao import BaseDao
 from firebase_admin import firestore
 from hclass_common.utils.timeutils import set_hour_24, fetch_appointments_list
@@ -61,6 +61,32 @@ class MatchingDao(BaseDao):
         data = sorted(new_data_list, key=lambda x: x.get('created_at'), reverse=True)[0]
         return data
 
+    @retries(7, 5)
+    def fetch_man_ready_matching(
+        self,
+        man_matching_id: str,
+    ) -> Dict:
+        man_matching_result = self.client.collection("matchings").document(man_matching_id).get()
+        assert man_matching_result.to_dict().get("status") == "ready"
+
+    @retries(7, 5)
+    def fetch_woman_rearranged_matching(
+        self,
+        woman_matching_id: str,
+    ) -> Dict:
+        man_matching_result = self.client.collection("matchings").document(woman_matching_id).get()
+        assert man_matching_result.to_dict().get("status") == "rearranged"
+        
+    @retries(4, 5)
+    def fetch_man_matching_complete(
+        self,
+        man_matching_id: str,
+    ) -> Dict:
+        man_matching_result = self.client.collection("matchings").document(man_matching_id).get()
+        print(man_matching_result.to_dict().get("status"))
+        assert man_matching_result.to_dict().get("status") == "complete"
+        
+    @retries(3, 3)
     def activate_matching_data(
         self,
         woman_matching_id: str,
@@ -71,7 +97,7 @@ class MatchingDao(BaseDao):
             {
                 "is_active": True, 
                 "women_status_ready_at": firestore.SERVER_TIMESTAMP,
-                "confirm_time_limit": set_hour_24()
+                "confirm_time_limit": set_hour_24(),
 
             }
         )
@@ -85,6 +111,7 @@ class MatchingDao(BaseDao):
 
     def insert_matching_data(self, man_user, woman_user) -> Tuple[Dict, Dict]:
         _, man_matching_ref = self.client.collection('matchings').add({
+            
             "created_at": firestore.SERVER_TIMESTAMP,
             "is_active": True,
             "status": 'not_ready',
@@ -115,6 +142,7 @@ class MatchingDao(BaseDao):
     def confirm_female_time_place(
         self,
         woman_matching_id: str,
+        man_matching_id: str,
         preferred_region: str = '한남동',
         preferred_place_type: str = '레스토랑',
         manner_comment: str = "반갑습닏. 저는 커피도 식사도 좋아요 :-)",
@@ -122,6 +150,7 @@ class MatchingDao(BaseDao):
         timelist = fetch_appointments_list()
         self.client.collection('matchings').document(woman_matching_id).update(
             {
+                "status": "ready",
                 "women_status_ready_at": firestore.SERVER_TIMESTAMP,
                 "confirm_time_limit": set_hour_24(1),
                 "preferred_region": preferred_region,
@@ -130,6 +159,11 @@ class MatchingDao(BaseDao):
                 "appointments": timelist,
                 "female_confirmed_at": firestore.SERVER_TIMESTAMP,
                 "updated_at": firestore.SERVER_TIMESTAMP
+            }
+        )
+        self.client.collection('matchings').document(man_matching_id).update(
+            {
+                "status": "ready",
             }
         )
         
@@ -164,3 +198,66 @@ class MatchingDao(BaseDao):
             }
         )
     
+    def rearrange_matching_place(
+        self,
+        man_matching_id: str,
+        woman_matching_id: str, 
+        preferred_region: str = '한남동',
+        preferred_place_type: str = '레스토랑',
+    ) -> Dict:
+        timelist = fetch_appointments_list()
+        self.client.collection('matchings').document(man_matching_id).update(
+            {
+                "status": "rearranged",
+                "appointments": timelist,
+                "updated_at": firestore.SERVER_TIMESTAMP,
+                "selected_place": {
+                    "description": "",
+                    "roadAddress": "서울특별시 강남구 논현로 854 안다즈호텔 지하 1층 112호",
+                    "link": "https://app.catchtable.co.kr/ct/main/searchRedirect?key=0921_cheeseroom",
+                    "title": "<b>치즈룸</b> 안다즈",
+                    "telephone": "",
+                }
+            }
+        )
+        print(woman_matching_id, 'woman matching id')
+        self.fetch_woman_rearranged_matching(woman_matching_id)
+
+    def confirm_rearranged_time(
+        self,
+        woman_matching_id: str,
+        man_matching_id,
+        preferred_region: str = '한남동',
+        preferred_place_type: str = '레스토랑',
+    ) -> Dict:
+        timelist = fetch_appointments_list()
+        self.client.collection('matchings').document(woman_matching_id).update(
+            {
+                "selected_appointment": timelist[0],
+                "status": "complete",
+                "updated_at": firestore.SERVER_TIMESTAMP,
+                "female_rearranged_confirmed_at": firestore.SERVER_TIMESTAMP,
+                
+            }
+        )
+        self.fetch_man_matching_complete(man_matching_id)
+
+    def fetch_matching(
+        self,
+        matching_id: str,
+    ) -> Dict:
+        return self.client.collection('matchings').document(matching_id).get().to_dict()
+
+    def fetch_matching_complete(
+        self,
+        man_uid: str,
+        woamn_uid: str,
+    ) -> Optional[Dict]:
+        matching_compelte_list = (
+            self.client.collection('matching_complete').where('male_user_uid', '==', man_uid).where("female_user_uid", '==', woamn_uid).get()
+        )
+        for x in matching_compelte_list:
+            datadict = x.to_dict()
+            datadict['dataid'] = x.id
+            return datadict
+
