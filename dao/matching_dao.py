@@ -1,4 +1,4 @@
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple
 from .base_dao import BaseDao
 from firebase_admin import firestore
 from hclass_common.utils.timeutils import set_hour_24, fetch_appointments_list
@@ -197,7 +197,7 @@ class MatchingDao(BaseDao):
                 "confirm_time_limit": set_hour_24(-1),
             }
         )
-    
+
     def rearrange_matching_place(
         self,
         man_matching_id: str,
