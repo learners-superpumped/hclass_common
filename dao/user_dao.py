@@ -1,4 +1,5 @@
 from typing import Dict, List
+import pandas as pd
 from .base_dao import BaseDao
 
 
@@ -25,3 +26,18 @@ class UserDao(BaseDao):
             user_list.append(data.to_dict())
         return user_list
 
+    def fetch_all_users_df(self) -> pd.DataFrame:
+        user_col_ref = self.client.collection("users")
+        result = user_col_ref.stream()
+        user_list = []
+        for data in result:
+            user_list.append(data.to_dict())
+        return pd.DataFrame(user_list)
+
+    def fetch_all_user_map(self) -> Dict[str, Dict]:
+        user_col_ref = self.client.collection("users")
+        result = user_col_ref.stream()
+        user_map = {}
+        for data in result:
+            user_map[data.id] = data.to_dict()
+        return user_map
