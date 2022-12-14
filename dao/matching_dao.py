@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional
 from .base_dao import BaseDao
 from firebase_admin import firestore
 from hclass_common.utils.timeutils import set_hour_24, fetch_appointments_list
