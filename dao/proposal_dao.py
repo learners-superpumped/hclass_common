@@ -2,6 +2,8 @@ from typing import Dict, List
 from .base_dao import BaseDao
 from firebase_admin import firestore
 from hclass_common.utils.func_utils import retries
+import pytz
+from datetime import datetime as dt
 
 
 class ProposalDao(BaseDao):
@@ -18,7 +20,25 @@ class ProposalDao(BaseDao):
             new_data_list.append(datadict)
         return new_data_list
 
-    def fetch_remained_proposals(
+    def fetch_daily_man_count_map(
+        self,
+    ) -> Dict[str, int]:
+        tzinfo = pytz.timezone("Asia/Seoul")
+        dtdata = dt(year=dt.now().year, month=dt.now().month, day=dt.now().day)
+        todaytime = dtdata.replace(tzinfo=tzinfo)
+        data_list = self.client.collection("proposals").where("gender", '==', "여성").where("created_at", ">", todaytime).get()
+        total_map = {}
+        for x in data_list:
+            datadict = x.to_dict()
+            datadict['dataid'] = x.id
+            partner_uid = datadict.get("partner_uid")
+            if not total_map.get(partner_uid):
+                total_map[partner_uid] = 1
+            else:
+                total_map[partner_uid] += 1
+        return total_map
+
+    def fetch_today_proposals(
         self,
     ) -> List[Dict]:
         data_list = self.client.collection("proposals").where('is_matched', '==', False).where("is_passed", '==', False).get()
