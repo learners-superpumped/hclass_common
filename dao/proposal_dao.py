@@ -114,6 +114,9 @@ class ProposalDao(BaseDao):
         partner_user: Dict,
         partner_user_evaluation: Dict
     ):
+        manner_comment = partner_user.get('manner_comment')
+        if not manner_comment:
+            manner_comment = partner_user.get('after_match')
         _, proposal_ref = self.client.collection("proposals").add({
             "uid": woman_user.get('uid'),
             "gender": "여성",
@@ -147,7 +150,7 @@ class ProposalDao(BaseDao):
                 "body_shape": partner_user.get("body_shape"),
                 "birthday": partner_user.get("birthday"),
                 "badges": partner_user.get("badges", []),
-                "after_match": partner_user.get('after_match'),
+                "after_match": manner_comment,
                 "additional_images_url": partner_user.get("additional_images_url", []),
             },
             "created_at": firestore.SERVER_TIMESTAMP,
