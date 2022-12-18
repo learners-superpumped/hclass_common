@@ -123,7 +123,7 @@ class MatchingDao(BaseDao):
             {
                 "is_active": True, 
                 "women_status_ready_at": firestore.SERVER_TIMESTAMP,
-                "confirm_time_limit": set_hour_24(),
+                "confirm_time_limit": set_hour_24(1),
 
             }
         )
