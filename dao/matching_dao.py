@@ -31,6 +31,32 @@ class MatchingDao(BaseDao):
         for matching_complete in matching_complete_list:
             self.client.collection("matching_completes").document(matching_complete.id).delete()
 
+    def delete_related_matchings_with_partners(
+        self, 
+        man_uid: str,
+        woman_uid: str,
+    ):
+        proposal_list = self.client.collection("matchings").where('uid', '==', man_uid).where("partner_uid", '==', woman_uid).get()
+        for proposal_data in proposal_list:
+            self.client.collection("matchings").document(proposal_data.id).delete()
+
+        proposal_list = self.client.collection("matchings").where('uid', '==', woman_uid).where("partner_uid", '==', man_uid).get()
+        for proposal_data in proposal_list:
+            self.client.collection("matchings").document(proposal_data.id).delete()
+
+        partner_proposal_list = (
+            self.client.collection("matching_completes").where('male_user_uid', '==', man_uid).where('female_user_uid', '==', woman_uid).get()
+        )
+        for proposal_data in partner_proposal_list:
+            self.client.collection("matching_completes").document(proposal_data.id).delete()
+
+        matching_complete_list = self.client.collection("reviews").where('uid', '==', man_uid).where("partner_uid", '==', woman_uid).get()
+        for matching_complete in matching_complete_list:
+            self.client.collection("reviews").document(matching_complete.id).delete()
+        matching_complete_list = self.client.collection("reviews").where('uid', '==', woman_uid).where("partner_uid", '==', man_uid).get()
+        for matching_complete in matching_complete_list:
+            self.client.collection("reviews").document(matching_complete.id).delete()
+
     @retries(4, 4)
     def fetch_recent_woman_matching(
         self,

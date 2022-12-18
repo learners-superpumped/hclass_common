@@ -86,6 +86,18 @@ class ProposalDao(BaseDao):
         for proposal_data in partner_proposal_list:
             self.client.collection("proposals").document(proposal_data.id).delete()
 
+    def delete_related_proposals_with_partners(
+        self, 
+        man_uid: str, 
+        woman_uid: str, 
+    ):
+        proposal_list = self.client.collection("proposals").where('uid', '==', man_uid).where("partner_uid", '==', woman_uid).get()
+        for proposal_data in proposal_list:
+            self.client.collection("proposals").document(proposal_data.id).delete()
+        partner_proposal_list = self.client.collection("proposals").where('uid', '==', woman_uid).where("partner_uid", '==', man_uid).get()
+        for proposal_data in partner_proposal_list:
+            self.client.collection("proposals").document(proposal_data.id).delete()
+
     @retries(5)
     def match_proposal(
         self, 
